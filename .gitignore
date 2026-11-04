@@ -1,0 +1,14 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# 录音和转写结果
+recordings/
+*.wav
+*.m4a
+*.mp3
+out.txt
+
+# macOS
+.DS_Store
