@@ -12,3 +12,6 @@ out.txt
 
 # macOS
 .DS_Store
+
+# 本地笔记
+NOTES.md
