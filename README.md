@@ -23,7 +23,17 @@ pip install -r requirements.txt
 
 ## Usage
 
-Record some English with Voice Memos, then run:
+Record straight from the microphone (press Enter to start, Enter again to stop), then transcribe:
+
+```bash
+python transcribe.py                     # system default microphone
+python transcribe.py --device AirPods    # pick a microphone by number or part of its name
+python audio.py --list                   # list available microphones
+```
+
+Recordings are saved to `recordings/` (ignored by git). The first time, macOS asks whether your terminal may use the microphone; if you get only silence, enable it under System Settings → Privacy & Security → Microphone and restart the terminal.
+
+Or transcribe an existing file, e.g. from Voice Memos:
 
 ```bash
 python transcribe.py ~/Desktop/test.m4a
@@ -49,6 +59,7 @@ Options:
 | `--pause` | 1.0 | Minimum gap in seconds counted as a long pause |
 | `--save` | — | Also save the transcript to this file |
 | `--model` | `mlx-community/parakeet-tdt-0.6b-v3` | Use a different Parakeet model |
+| `--device` | system default | Microphone to record with (number or part of its name) |
 
 ---
 
@@ -75,7 +86,17 @@ pip install -r requirements.txt
 
 ### 使用
 
-用“语音备忘录”录一段英文，然后：
+直接用麦克风录（按回车开始，再按回车结束），录完马上识别：
+
+```bash
+python transcribe.py                     # 系统默认麦克风
+python transcribe.py --device AirPods    # 指定麦克风：编号或名字的一部分
+python audio.py --list                   # 列出所有麦克风
+```
+
+录音存在 `recordings/` 文件夹里（不会提交到 git）。第一次录音时 macOS 会问终端能不能用麦克风；如果录出来全是静音，去 系统设置 → 隐私与安全性 → 麦克风 打开你的终端，然后重启终端。
+
+也可以识别已有的录音文件，比如“语音备忘录”录的：
 
 ```bash
 python transcribe.py ~/Desktop/test.m4a
@@ -99,3 +120,4 @@ python transcribe.py ~/Desktop/test.m4a --save out.txt
 | `--pause` | 1.0 | 超过多少秒算长停顿 |
 | `--save` | — | 把文本另存到文件 |
 | `--model` | `mlx-community/parakeet-tdt-0.6b-v3` | 换用其他 Parakeet 模型 |
+| `--device` | 系统默认 | 录音用的麦克风（编号或名字的一部分） |

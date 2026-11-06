@@ -2,6 +2,8 @@
 transcribe.py — 在本地把英文录音转成文字（NVIDIA Parakeet 模型，Apple Silicon 上用 MLX 运行）。
 
 用法:
+    python transcribe.py                      # 不给文件：直接用麦克风录一段再识别
+    python transcribe.py --device AirPods     # 指定麦克风（编号或名字的一部分）
     python transcribe.py recording.m4a
     python transcribe.py recording.m4a --save out.txt
 
@@ -159,7 +161,10 @@ def print_report(text: str, words: list[Word], stats: dict,
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="本地英文语音转文字（Parakeet + MLX）")
-    parser.add_argument("audio", type=Path, help="录音文件（m4a / mp3 / wav ...）")
+    parser.add_argument("audio", type=Path, nargs="?",
+                        help="录音文件（m4a / mp3 / wav ...）；不给就用麦克风现场录")
+    parser.add_argument("--device", help="录音用的麦克风：编号或名字的一部分，默认系统默认麦克风。"
+                        "用 python audio.py --list 查看")
     parser.add_argument("--model", default=MODEL_ID, help=f"Hugging Face 模型名，默认 {MODEL_ID}")
     parser.add_argument("--save", type=Path, help="把转写文本另存到这个文件")
     parser.add_argument("--confidence", type=float, default=0.6,
@@ -168,7 +173,7 @@ def main() -> None:
                         help="超过这么多秒的停顿算“长停顿”，默认 1.0")
     args = parser.parse_args()
 
-    if not args.audio.exists():
+    if args.audio and not args.audio.exists():
         sys.exit(f"找不到文件: {args.audio}")
 
     setup_audio_loader()
@@ -176,11 +181,18 @@ def main() -> None:
     print(f"加载模型 {args.model}（第一次会下载，约 1.2 GB）...")
     t0 = time.time()
     model = from_pretrained(args.model)
-    print(f"模型就绪（{time.time() - t0:.1f} 秒），开始识别 ...")
+    print(f"模型就绪（{time.time() - t0:.1f} 秒）")
 
+    # 先加载模型再录音，这样录完马上就能出结果
+    audio_path = args.audio
+    if audio_path is None:
+        from audio import record_to_file
+        audio_path = record_to_file(args.device)
+
+    print("开始识别 ...")
     t1 = time.time()
     # chunk_duration：长录音按 2 分钟一段处理，避免占用太多内存；短录音不受影响
-    result = model.transcribe(str(args.audio), chunk_duration=120)
+    result = model.transcribe(str(audio_path), chunk_duration=120)
     print(f"识别完成（{time.time() - t1:.1f} 秒）")
 
     words = tokens_to_words(result.tokens)
